@@ -4,13 +4,6 @@ import glob
 import cv2
 import torch
 
-"""
-Vehicle detection using YOLOv5 weights (.pt) via torch.hub (ultralytics/yolov5).
-- Inputs from ./test_images/
-- Outputs to ./output_images/ with 'output_' prefix
-- Filters to vehicle-like classes: car, bus, truck, motorcycle/bike, bicycle, rickshaw (if present)
-"""
-
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 WEIGHTS_PATH = os.path.join(BASE_DIR, 'bin', 'best.pt')
 INPUT_DIR = os.path.join(BASE_DIR, 'test_images')
@@ -25,9 +18,8 @@ CONF_THRESHOLD = float(os.environ.get('YOLO_CONF', 0.3))
 
 def load_model(weights: str):
     try:
-        # Note: this downloads the YOLOv5 repo if not cached
         model = torch.hub.load('ultralytics/yolov5', 'custom', path=weights, force_reload=False)
-        model.conf = CONF_THRESHOLD  # confidence threshold
+        model.conf = CONF_THRESHOLD 
         return model
     except Exception as e:
         print('ERROR: torch.hub failed to load YOLOv5 model:', e, file=sys.stderr)
@@ -47,7 +39,6 @@ def main():
 
     model = load_model(WEIGHTS_PATH)
 
-    # Collect images
     exts = ('*.jpg', '*.jpeg', '*.png', '*.bmp')
     image_paths = []
     for ext in exts:
@@ -67,16 +58,14 @@ def main():
             continue
 
         try:
-            results = model(img)  # inference
+            results = model(img)  
         except Exception as e:
             print(f'ERROR: Inference failed for {img_path}: {e}', file=sys.stderr)
             continue
 
-        # results.pandas().xyxy[0] -> DataFrame with columns: xmin, ymin, xmax, ymax, confidence, class, name
         try:
             df = results.pandas().xyxy[0]
         except Exception:
-            # Fallback: just save original image
             out_path = os.path.join(OUTPUT_DIR, 'output_' + os.path.basename(img_path))
             cv2.imwrite(out_path, img)
             print('Saved (no detections):', out_path)
