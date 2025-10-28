@@ -1,0 +1,20 @@
+# YOLOv5 inference dependencies (torch.hub: ultralytics/yolov5)
+torch
+torchvision
+
+# I/O and visualization
+opencv-python
+numpy
+pillow
+matplotlib
+seaborn
+
+# Data + utility
+pandas
+requests
+pyyaml
+scipy
+tqdm
+gitpython
+psutil
+thop  
